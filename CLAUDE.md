@@ -83,6 +83,8 @@ UniFi Controller → unifi_client.py (get_health, get_system_info)
 - `_FILE` takes precedence if both `VAR` and `VAR_FILE` are set
 - Resolved at startup in `run.py` before `.env` loading, so all downstream code (pydantic-settings, `os.getenv()`) works without modification
 - Merged Dependabot PR #88 (actions/stale v9 → v10)
+- Fix Express in AP-only mode missing from Network Pulse AP detail list (#90) — `get_ap_details()` now includes `device_mode_override=mesh` check matching `get_access_points()` and `get_system_info()`
+- Remove UI Product Selector card from dashboard (service shut down) — info cards moved to dedicated full-width `.info-row` for balanced 3+2 layout
 
 ### v1.10.0
 - Add multi-WAN support to Network Pulse (#83) — per-WAN IP (click-to-reveal), throughput tabs, latency, and uptime for dual/multi-WAN setups
