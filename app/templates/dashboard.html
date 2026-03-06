@@ -307,7 +307,7 @@
                         This is non-sensitive system info you can share when reporting issues.
                         No passwords, IPs, or API keys are included.
                     </p>
-                    <textarea id="debug-info-text" readonly rows="14">Loading...</textarea>
+                    <textarea id="debug-info-text" readonly rows="18">Loading...</textarea>
                     <div style="display: flex; align-items: center; gap: 1rem; margin-top: 1rem;">
                         <button id="copy-debug-btn" class="btn btn-primary">Copy to Clipboard</button>
                         <span id="copy-debug-msg" style="font-size: 0.9rem; color: var(--accent-color); opacity: 0; transition: opacity 0.3s;">Copied!</span>
@@ -1235,6 +1235,16 @@
                 } else {
                     text += `Gateway: Not configured or not connected\n`;
                 }
+                if (info.access_points && info.access_points.length > 0) {
+                    text += `Access Points (${info.access_points.length}):\n`;
+                    for (const ap of info.access_points) {
+                        text += `  ${ap.name}: ${ap.model_code}`;
+                        if (ap.display_name && ap.display_name !== ap.model_code) {
+                            text += ` (${ap.display_name})`;
+                        }
+                        text += `\n`;
+                    }
+                }
                 text += `Browser: ${navigator.userAgent}\n`;
                 return text;
             }
@@ -1365,6 +1375,22 @@
                         }
                     } else {
                         body += `- **Gateway:** Not configured or not connected\n`;
+                    }
+
+                    // Add AP info if available
+                    if (info.access_points && info.access_points.length > 0) {
+                        body += `- **Access Points (${info.access_points.length}):**\n`;
+                        const apsToShow = info.access_points.slice(0, 10);
+                        for (const ap of apsToShow) {
+                            body += `  - ${ap.name}: \`${ap.model_code}\``;
+                            if (ap.display_name && ap.display_name !== ap.model_code) {
+                                body += ` (${ap.display_name})`;
+                            }
+                            body += `\n`;
+                        }
+                        if (info.access_points.length > 10) {
+                            body += `  - _(and ${info.access_points.length - 10} more)_\n`;
+                        }
                     }
 
                 } catch (error) {

@@ -274,9 +274,10 @@ async def get_debug_info():
     # Detect if running in Docker
     is_docker = Path("/.dockerenv").exists()
 
-    # Get cached gateway info (if available)
+    # Get cached info (if available)
     gateway_info = cache.get_gateway_info()
     ips_settings = cache.get_ips_settings()
+    ap_info = cache.get_ap_info()
 
     # Build response with non-sensitive info only
     debug_info = {
@@ -298,7 +299,8 @@ async def get_debug_info():
             "supports_ids_ips": gateway_info.get("supports_ids_ips") if gateway_info else None,
             "is_unifi_os": gateway_info.get("is_unifi_os") if gateway_info else None,
             "ips_mode": ips_settings.get("ips_mode") if ips_settings else None
-        }
+        },
+        "access_points": ap_info or []
     }
 
     return debug_info
@@ -427,6 +429,26 @@ async def get_system_status():
             })
             if ips_settings:
                 cache.set_ips_settings(ips_settings)
+
+            # Cache AP info for debug-info endpoint
+            from shared.unifi_client import get_friendly_model_name, EXPRESS_MODEL_CODES
+            ap_list = []
+            for dev in system_info.get('devices', []):
+                dev_type = dev.get('type', '')
+                model_code = (dev.get('model') or '').upper()
+                is_ap = dev_type == 'uap'
+                is_express_ap = (
+                    (dev_type == 'ux' or model_code in EXPRESS_MODEL_CODES)
+                    and dev.get('device_mode_override') == 'mesh'
+                )
+                if is_ap or is_express_ap:
+                    ap_list.append({
+                        "name": dev.get('name') or get_friendly_model_name(model_code),
+                        "model_code": dev.get('model') or 'Unknown',
+                        "display_name": get_friendly_model_name(model_code)
+                    })
+            ap_list.sort(key=lambda x: (x.get('name') or '').lower())
+            cache.set_ap_info(ap_list)
 
             return {
                 "configured": True,

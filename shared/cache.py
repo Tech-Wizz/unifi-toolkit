@@ -6,7 +6,7 @@ change frequently. Data is cached with a TTL and refreshed on demand.
 """
 import logging
 from datetime import datetime, timezone, timedelta
-from typing import Optional, Dict, Any
+from typing import Optional, Dict, List, Any
 
 logger = logging.getLogger(__name__)
 
@@ -83,6 +83,23 @@ def set_ips_settings(data: Dict):
         "timestamp": datetime.now(timezone.utc)
     }
     logger.debug(f"Cached IPS settings: mode={data.get('ips_mode', 'unknown')}")
+
+
+def get_ap_info() -> Optional[List]:
+    """Get cached AP info for debug reporting."""
+    entry = _cache.get("ap_info")
+    if entry and not _is_expired(entry):
+        return entry.get("data")
+    return None
+
+
+def set_ap_info(data: List):
+    """Cache AP info list (name, model_code, display_name per AP)."""
+    _cache["ap_info"] = {
+        "data": data,
+        "timestamp": datetime.now(timezone.utc)
+    }
+    logger.debug(f"Cached AP info: {len(data)} APs")
 
 
 def get_system_status() -> Optional[Dict]:

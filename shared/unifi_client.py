@@ -95,7 +95,8 @@ UNIFI_MODEL_NAMES = {
     "UAPA6A4": "U7 Pro XGS",
     "U7PRO": "U7 Pro",
     "U7PIW": "U7 Pro Wall",
-    "U7LR": "U7 LR",
+    "G7LR": "U7 LR",
+    "U7LR": "UAP AC LR",
     "U7UKU": "UK Ultra",
     "U6PRO": "U6 Pro",
     "U6LR": "U6 LR",
@@ -1408,7 +1409,8 @@ class UniFiClient:
                             'type': device_type,
                             'mac': device.get('mac'),
                             'state': device.get('state', 0),
-                            'uptime': device.get('uptime')
+                            'uptime': device.get('uptime'),
+                            'device_mode_override': device.get('device_mode_override')
                         })
 
             # If no gateway found, might be hosted/cloud controller
