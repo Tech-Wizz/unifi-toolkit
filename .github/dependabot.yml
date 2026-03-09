@@ -8,10 +8,6 @@ updates:
       day: "monday"
       time: "09:00"
     open-pull-requests-limit: 5
-    ignore:
-      # aiounifi is locked to version 85 due to Python 3.9-3.12 constraint
-      - dependency-name: "aiounifi"
-        update-types: ["version-update:semver-major", "version-update:semver-minor"]
     commit-message:
       prefix: "deps"
       include: "scope"
@@ -24,10 +20,6 @@ updates:
       day: "monday"
       time: "09:00"
     open-pull-requests-limit: 3
-    ignore:
-      # Stay on Python 3.12 - aiounifi 85 doesn't support 3.13+
-      - dependency-name: "python"
-        versions: [">=3.13"]
     commit-message:
       prefix: "deps"
       include: "scope"

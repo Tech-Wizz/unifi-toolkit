@@ -427,13 +427,8 @@ async def discover_unifi_clients(
             # Build response list
             client_list = []
             for mac, client in clients_dict.items():
-                # Handle both dict (UniFi OS) and object (aiounifi) formats
-                if isinstance(client, dict):
-                    friendly_name = client.get('name') or client.get('friendly_name')
-                    hostname = client.get('hostname')
-                else:
-                    friendly_name = getattr(client, 'name', None) or getattr(client, 'friendly_name', None)
-                    hostname = getattr(client, 'hostname', None)
+                friendly_name = client.get('name') or client.get('friendly_name')
+                hostname = client.get('hostname')
 
                 # Use friendly name if exists, otherwise use hostname
                 display_name = friendly_name or hostname

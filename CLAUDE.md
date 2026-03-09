@@ -4,7 +4,7 @@
 FastAPI-based web dashboard for UniFi network management and monitoring. Deployed via Docker (Synology NAS, Unraid, etc.).
 
 ## Tech Stack
-- **Backend:** Python 3.9+, FastAPI, SQLAlchemy (async, SQLite), Alembic migrations
+- **Backend:** Python 3.9+, FastAPI, SQLAlchemy (async, SQLite), Alembic migrations, aiohttp (UniFi API)
 - **Frontend:** Jinja2 templates, vanilla JS (main dashboard), Alpine.js (Network Pulse)
 - **Auth:** Optional session-based auth (production mode)
 
@@ -38,9 +38,8 @@ Version is maintained in THREE files — keep them in sync:
 - `app/main.py` → `version="X.Y.Z"` (FastAPI constructor)
 
 ### UniFi API Client (`shared/unifi_client.py`)
-- Supports both UniFi OS (modern) and legacy controller APIs
-- Auto-detects controller type during `connect()`
-- UniFi OS uses `/proxy/network/api/` prefix; legacy uses `/api/`
+- **UniFi OS only** — legacy standalone controller support was removed in v1.11.0 (aiounifi dependency dropped)
+- All API calls use `/proxy/network/api/` prefix via aiohttp
 - Health endpoint returns subsystems: wan, wan2+, lan, wlan, vpn, www
 - WAN detection is dynamic via `startswith('wan')` — supports N WANs
 - **Signal strength:** UniFi API returns separate `rssi` and `signal` fields — use `signal` (matches console display) with `rssi` fallback
@@ -81,6 +80,12 @@ UniFi Controller → unifi_client.py (get_health, get_system_info)
 - Extra WANs stored in `NetworkHealth.extra_wans` dict
 
 ## Completed Work
+
+### v1.11.0
+- Drop legacy standalone controller support (#92) — removed aiounifi dependency entirely, all API calls now use direct aiohttp requests to UniFi OS endpoints
+- Remove Python 3.13 version block from `setup.sh` — the aiounifi constraint was the only reason for the block
+- Simplify `shared/unifi_client.py` — removed all `if self.is_unifi_os:` URL conditionals and legacy `else` branches
+- Update Dependabot config — removed aiounifi ignore rules and Python version pinning
 
 ### v1.10.3
 - Fix UAP-AC-LR model mapping (#89) — `U7LR` model code was incorrectly mapped to "U7 LR" (WiFi 7 product); corrected to "UAP AC LR" and added `G7LR` → "U7 LR" for the actual WiFi 7 U7 Long-Range AP
