@@ -313,6 +313,7 @@ body {
     border: 1px solid var(--border-color);
     border-radius: 12px;
     padding: 1.25rem;
+    min-width: 0;
 }
 
 .chart-card h3 {
@@ -524,6 +525,7 @@ body {
 .chart-container {
     position: relative;
     height: 200px;
+    overflow: hidden;
 }
 
 .chart-container-bar {
