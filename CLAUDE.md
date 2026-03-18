@@ -90,6 +90,9 @@ All v2 events are normalized before the scheduler sees them — the scheduler on
 
 ## Completed Work
 
+### v1.11.2
+- Fix Network Pulse chart panels not resizing responsively (#96) — `min-width: 0` on `.chart-card` and `overflow: hidden` on `.chart-container` fix CSS Grid min-width:auto gotcha that prevented canvas-based chart cards from shrinking on narrow viewports
+
 ### v1.11.1
 - Fix Threat Watch missing geo/category data from v2 API (#79) — `source.region` mapped to country code (was looking for nonexistent `source.country`), `ips.category_name` mapped to category (was using `ips.ips_category` which only exists in `policies[]`)
 - Document that `unifi.ui.com` cloud access is not supported — controller URL must be a local IP/hostname (README.md and INSTALLATION.md)
