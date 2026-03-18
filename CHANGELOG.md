@@ -2,6 +2,135 @@
 
 All notable changes to UI Toolkit will be documented in this file.
 
+## [1.11.2] - 2026-03-18
+
+### Fixed
+- **Network Pulse chart panel resizing** - Chart cards now resize responsively on narrow viewports. Added `min-width: 0` on `.chart-card` and `overflow: hidden` on `.chart-container` to fix the CSS Grid min-width:auto gotcha that prevented canvas-based charts from shrinking. (#96)
+
+### Changed
+- **Documentation updated for UniFi OS requirement** - Removed all references to legacy standalone controllers from README and INSTALLATION.md. Added clear "UniFi OS required" callout, removed port 8443 examples, lifted Python 3.13 restriction, reordered auth options to lead with API key. (#97)
+
+---
+
+## [1.11.1] - 2026-03-10
+
+### Fixed
+- **Threat Watch geo/category data from v2 API** - `source.region` mapped to country code (was looking for nonexistent `source.country`), `ips.category_name` mapped to category (was using `ips.ips_category` which only exists in `policies[]`). (#79)
+
+### Changed
+- **Document cloud access limitation** - Controller URL must be a local IP/hostname; `unifi.ui.com` cloud access is not supported (README.md and INSTALLATION.md).
+
+### Removed
+- **Dead v2 parser** - Removed unreachable `_parse_v2_traffic_flow()` from Threat Watch scheduler — v2 events are pre-normalized to legacy format by `_normalize_v2_event()` before reaching the scheduler.
+
+### Dependencies
+- docker/metadata-action v5 → v6 (#93)
+- docker/build-push-action v6 → v7 (#94)
+
+---
+
+## [1.11.0] - 2026-03-10
+
+### Changed
+- **Drop legacy standalone controller support** - Removed aiounifi dependency entirely. All API calls now use direct aiohttp requests to UniFi OS endpoints. **Users on standalone/self-hosted controllers (the Java-based controller software) should stay on v1.10.3.** (#92)
+- **Remove Python 3.13 version block** - The aiounifi constraint was the only reason for the block; Python 3.13+ is now supported.
+- **Simplify UniFi client** - Removed all `if self.is_unifi_os:` URL conditionals and legacy `else` branches from `shared/unifi_client.py`.
+- **Update Dependabot config** - Removed aiounifi ignore rules and Python version pinning.
+
+---
+
+## [1.10.3] - 2026-03-06
+
+### Fixed
+- **UAP-AC-LR model mapping** - `U7LR` model code was incorrectly mapped to "U7 LR" (a WiFi 7 product); corrected to "UAP AC LR". Added `G7LR` → "U7 LR" for the actual WiFi 7 U7 Long-Range AP. (#89)
+
+### Added
+- **AP model codes in debug info** - `/api/debug-info` now includes AP names, raw model codes, and display names; shown in Debug Info modal and Report Issue template for faster diagnosis.
+
+---
+
+## [1.10.2] - 2026-03-06
+
+### Improved
+- **Threat Watch test-fetch diagnostics** - Test both v2 payload formats independently, capture rejection body, total flow count, sample flow keys, and nested structure for faster remote debugging. (#85)
+
+### Added
+- **Gateway firmware in debug info** - `get_gateway_info()`, `/api/debug-info` endpoint, Debug Info modal, and Report Issue template now include gateway firmware version.
+
+---
+
+## [1.10.1] - 2026-03-01
+
+### Added
+- **Docker Swarm secrets support** - `_FILE` env var suffix reads secret values from files (e.g., `ENCRYPTION_KEY_FILE=/run/secrets/key`) for orchestrators that mount secrets as files. Supported for `ENCRYPTION_KEY`, `AUTH_USERNAME`, `AUTH_PASSWORD_HASH`, `DATABASE_URL`, `UNIFI_PASSWORD`, `UNIFI_API_KEY`. `_FILE` takes precedence if both forms are set. (#86)
+
+### Fixed
+- **Express in AP mode missing from Network Pulse** - `get_ap_details()` now includes `device_mode_override=mesh` check matching `get_access_points()` and `get_system_info()`. (#90)
+
+### Changed
+- **Remove UI Product Selector card** - Service shut down; info cards moved to dedicated full-width `.info-row` for balanced 3+2 layout.
+
+### Dependencies
+- actions/stale v9 → v10 (#88)
+
+---
+
+## [1.10.0] - 2026-02-25
+
+### Added
+- **Multi-WAN support in Network Pulse** - Per-WAN IP (click-to-reveal), throughput tabs, latency, and uptime for dual/multi-WAN setups. WAN tab selector in Current Throughput section (hidden for single-WAN). Extra WAN entries in WAN Status card and Network Health panel. (#83)
+
+### Fixed
+- **Threat Watch external links not opening** - `@click.prevent` modifier was unconditionally blocking navigation on AbuseIPDB, VirusTotal, and Shodan links. (#79)
+
+---
+
+## [1.9.21] - 2026-02-23
+
+### Fixed
+- **UniFi Express in AP-only mode not detected as AP** - Express reports `type: "udm"` with `device_mode_override: "mesh"` when in AP mode. Now correctly skipped as gateway candidate and counted as AP in device counts and `get_access_points()`. (#71)
+
+### Dependencies
+- greenlet dependency update (#68)
+
+---
+
+## [1.9.20] - 2026-02-23
+
+### Added
+- **Threat Watch time range filter** - 24h / 7d (default) / 30d dropdown in filter bar, scopes both events table and stat cards. Added `time_range` query param to `/api/events` and `/api/events/stats` endpoints. (#75)
+- **Auto-purge old threat events** - Events older than 30 days are automatically purged hourly via scheduler to keep DB size in check.
+
+### Fixed
+- **Threat Watch webhook delivery** - Scheduler was calling WiFi Stalker's `deliver_webhook` instead of `deliver_threat_webhook`, causing `custom_message` kwarg error on real alerts while test webhooks worked fine. (#77)
+
+---
+
+## [1.9.19] - 2026-02-22
+
+### Improved
+- **Form input accessibility** - Removed placeholder text from form inputs for accessibility — users with cognitive disabilities may confuse placeholders with filled-in fields. Replaced with visible `<small>` hint text below inputs with `aria-describedby` for screen readers. (#73)
+
+### Added
+- **Update available notification** - Dashboard header badge shows when a new version is available. New `/api/update-check` endpoint fetches latest GitHub release, compares against running version, caches for 1 hour. Badge links to GitHub release page; silently hidden if GitHub is unreachable. (#74)
+
+### Fixed
+- **Network Pulse theme default** - Was defaulting to dark mode instead of matching dashboard's light default.
+
+---
+
+## [1.9.18] - 2026-02-22
+
+### Fixed
+- **Threat Watch getting 0 IPS events** - Use correct v2 traffic-flows payload format with server-side `policy_type: ["INTRUSION_PREVENTION"]` filtering instead of paginating all flows and filtering client-side. Pass scheduler timestamps through to v2 API (previously hardcoded to `timeRange: "24h"`). Added backward-compatible fallback for older firmware via `_v2_uses_new_payload` flag. (#63)
+- **WiFi Stalker table overflow** - Long hostnames no longer push delete button off-screen. (#72)
+
+### Added
+- **`payload_format` diagnostic field** - Debug endpoint now reports which v2 payload format is in use.
+- **`curl` dependency check** - `upgrade.sh` preflight now verifies `curl` is available. (#70)
+
+---
+
 ## [1.9.17] - 2026-02-21
 
 ### Fixed
